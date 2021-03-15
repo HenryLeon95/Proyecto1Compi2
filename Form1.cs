@@ -71,7 +71,7 @@ namespace Proyecto1
 
         private void ViewErrors()
         {
-            SalidaErrores.AppendText("================== ERRORES LEXICOS Y SINTACTICOS ==================" + "\n");
+            SalidaErrores.AppendText("================== ERRORES LEXICOS, SINTACTICOS ==================" + "\n");
             SalidaErrores.AppendText("Linea" + "\t" + "Columna" + "\t\t" + "Tipo" + "\t\t" + "Descripcion"  + "\n");
             foreach (Error error in error_list)
             {
@@ -146,6 +146,13 @@ namespace Proyecto1
                 Debug.WriteLine("Iniciando Recorrido del AST, Entorno 0\n");
                 Ejecucionn ejec = new Ejecucionn(ent);
                 ejec.Procedure();
+
+                SalidaErrores.AppendText("\n======================= SEMÁNTICOS =======================" + "\n");
+                SalidaErrores.AppendText("Linea" + "\t" + "Columna" + "\t\t" + "Tipo" + "\t\t" + "Descripcion" + "\n");
+                foreach (Error error in ejec.error)
+                {
+                    SalidaErrores.AppendText(error.line + "\t" + error.column + "\t\t" + error.type + "\t" + error.description + "\n");
+                }
             }
             else
             {
