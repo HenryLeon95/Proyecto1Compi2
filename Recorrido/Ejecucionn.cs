@@ -4,6 +4,7 @@ using Proyecto1.Ejecucion;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Text;
 
 namespace Proyecto1.Recorrido
@@ -28,7 +29,10 @@ namespace Proyecto1.Recorrido
 
         public void Procedure()
         {
+            Debug.WriteLine("Buscando entorno: {0}, {1} ",entG[0].Ambito, entG[0].AmbitoPadre);
             cimaEnt = getEntorno(entG[0].Ambito, entG[0].AmbitoPadre, entG);
+            Debug.WriteLine(cimaEnt.var.Count);
+            //cimaEnt = getEntorno("raiz", "raiz", entG);
             pilaEntornos.Push(cimaEnt);
             Ejecutar(cimaEnt.nodoAux);
         }
@@ -40,7 +44,6 @@ namespace Proyecto1.Recorrido
             cimaTS = proc;      
             nivelActual = 0;
             Retorno2 ret = Sentencias(Nodo);
-            //RetornoAc retorno = Sentencias(Nodo);
         }
 
         private Retorno2 Sentencias(ParseTreeNode Nodo)
@@ -129,6 +132,22 @@ namespace Proyecto1.Recorrido
 
                                     break;
                             }
+
+                            switch (Nodo.ChildNodes[0].Term.Name)
+                            {
+                                case "graficar_ts":
+                                    #region
+                                    PdfTS();
+                                    Debug.WriteLine("Graficando TS *****************************");
+                                    #endregion
+                                    break;
+
+                                case "else":
+                                    Debug.WriteLine("IIIIIIIIIIIIIIIIIIIIF 0");
+
+                                    Retorno2 ret2 = Sentencias(Nodo.ChildNodes[2]);
+                                    return ret2;
+                            }
                             break;
                         case 5:
                             #region
@@ -137,14 +156,382 @@ namespace Proyecto1.Recorrido
                                 case "write":
                                     string retWrite = getPrint(Nodo.ChildNodes[2]);
                                     Form1.Salida_Inst.AppendText(retWrite);
-                                    Console.WriteLine("+++++++++++ PRINT +++++++++++++");
                                     return new Retorno2("-", "-", "0", "0");
 
                                 case "writeln":
                                     string retWriteln = getPrint(Nodo.ChildNodes[2]);
                                     Form1.Salida_Inst.AppendText(retWriteln + "\n");
-                                    Console.WriteLine("+++++++++++ PRINT +++++++++++++");
                                     Debug.WriteLine("IMPRIMIENDO");
+                                    return new Retorno2("-", "-", "0", "0");
+
+                                case "repeat":
+                                    Debug.WriteLine("REPEAT 0000001");
+                                    bool flag2 = true;
+                                    int con = 0;
+                                    while (flag2)
+                                    {
+                                        Retorno retW = Cond(Nodo.ChildNodes[3]);
+                                        Debug.WriteLine("El REPEAT es: " + retW.Value);
+
+                                        if (retW != null)
+                                        {
+                                            if (retW.Value.Equals("False") || con == 0)
+                                            {
+                                                Debug.WriteLine("El WHILE es True");
+                                                Retorno2 ret2 = Sentencias(Nodo.ChildNodes[1]);
+                                                con += 1;
+                                            }
+                                            else
+                                            {
+                                                flag2 = false;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            Debug.WriteLine("**Error Semantico** . REPEAT incorrecto en la linea: " + getLine(Nodo.ChildNodes[0]) + " columna:" + getColumn(Nodo.ChildNodes[0]));
+                                            error.Add(new Error(int.Parse(getLine(Nodo.ChildNodes[0])), int.Parse(getColumn(Nodo.ChildNodes[0])), Reservada.ErrorSemantico, "REPEAT incorrecto"));
+                                        }
+                                    }
+
+                                    return new Retorno2("-", "-", "0", "0");
+                            }
+                            #endregion
+                            break;
+
+                        case 7:
+                            #region
+                            switch (Nodo.ChildNodes[0].Term.Name)
+                            {
+                                case "if":
+                                    if (Nodo.ChildNodes[6].Term.Name.Equals(";"))
+                                    { 
+                                        Debug.WriteLine("IIIIIIIIIIIIIIIIIIIIF 00000000");
+                                        Retorno ret = Cond(Nodo.ChildNodes[1]);
+
+                                        if (ret != null)
+                                        {
+                                            Debug.WriteLine("Valor retornado del IF: " + ret.Value);
+                                            if (ret.Value.Equals("True"))
+                                            {
+                                                Debug.WriteLine("El if es True");
+                                                Retorno2 ret2 = Sentencias(Nodo.ChildNodes[4]);
+                                                return ret2;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            Debug.WriteLine("**Error Semantico** . IF incorrecto en la linea: " + getLine(Nodo.ChildNodes[0]) + " columna:" + getColumn(Nodo.ChildNodes[0]));
+                                            error.Add(new Error(int.Parse(getLine(Nodo.ChildNodes[0])), int.Parse(getColumn(Nodo.ChildNodes[0])), Reservada.ErrorSemantico, "IF incorrecto"));
+                                        }
+                                        return new Retorno2("-", "-", "0", "0");
+
+                                    }
+                                    else {
+                                        Debug.WriteLine("IIIIIIIIIIIIIIIIIIIIF 0000001");
+                                        Retorno ret3 = Cond(Nodo.ChildNodes[1]);
+
+                                        if (ret3 != null)
+                                        {
+                                            Debug.WriteLine("Valor retornado del IF: " + ret3.Value);
+                                            if (ret3.Value.Equals("True"))
+                                            {
+                                                Debug.WriteLine("El if es True");
+                                                Retorno2 ret2 = Sentencias(Nodo.ChildNodes[4]);
+                                                return ret2;
+                                            }
+                                            else
+                                            {
+                                                Debug.WriteLine("El if es False");
+                                                Retorno2 ret2 = Sentencias(Nodo.ChildNodes[6]);
+                                                return ret2;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            Debug.WriteLine("**Error Semantico** . IF incorrecto en la linea: " + getLine(Nodo.ChildNodes[0]) + " columna:" + getColumn(Nodo.ChildNodes[0]));
+                                            error.Add(new Error(int.Parse(getLine(Nodo.ChildNodes[0])), int.Parse(getColumn(Nodo.ChildNodes[0])), Reservada.ErrorSemantico, "IF incorrecto"));
+                                        }
+                                        return new Retorno2("-", "-", "0", "0");
+                                    }
+
+                                case "while":
+                                    Debug.WriteLine("WHILE 0000001");
+                                    bool flag2 = true;
+                                    while (flag2)
+                                    {
+                                        Retorno retW = Cond(Nodo.ChildNodes[1]);
+                                        Debug.WriteLine("El WHILE es: " + retW.Value);
+
+                                        if (retW != null)
+                                        {
+                                            if (retW.Value.Equals("True"))
+                                            {
+                                                Debug.WriteLine("El WHILE es True");
+                                                Retorno2 ret2 = Sentencias(Nodo.ChildNodes[4]);
+                                            }
+                                            else
+                                            {
+                                                flag2 = false;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            Debug.WriteLine("**Error Semantico** . WHILE incorrecto en la linea: " + getLine(Nodo.ChildNodes[0]) + " columna:" + getColumn(Nodo.ChildNodes[0]));
+                                            error.Add(new Error(int.Parse(getLine(Nodo.ChildNodes[0])), int.Parse(getColumn(Nodo.ChildNodes[0])), Reservada.ErrorSemantico, "WHILE incorrecto"));
+                                        }
+                                    }
+
+                                    return new Retorno2("-", "-", "0", "0");
+                            }
+                            #endregion
+                            break;
+
+                        case 8:
+                            #region
+                            switch (Nodo.ChildNodes[0].Term.Name)
+                            {
+                                /*case "if":
+                                    Debug.WriteLine("IIIIIIIIIIIIIIIIIIIIF 0");
+                                    Retorno ret = Cond(Nodo.ChildNodes[1]);
+
+                                    if (ret != null)
+                                    {
+                                        Debug.WriteLine("Valor retornado del IF: " + ret.Value);
+                                        if (ret.Value.Equals("True"))
+                                        {
+                                            Debug.WriteLine("El if es True");
+                                            Retorno2 ret2 = Sentencias(Nodo.ChildNodes[4]);
+                                            return ret2;
+                                        }
+                                        else
+                                        {
+                                            Debug.WriteLine("El if es False");
+                                            Retorno2 ret2 = Sentencias(Nodo.ChildNodes[7]);
+                                            return ret2;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        Debug.WriteLine("**Error Semantico** . IF incorrecto en la linea: " + getLine(Nodo.ChildNodes[0]) + " columna:" + getColumn(Nodo.ChildNodes[0]));
+                                        error.Add(new Error(int.Parse(getLine(Nodo.ChildNodes[0])), int.Parse(getColumn(Nodo.ChildNodes[0])), Reservada.ErrorSemantico, "IF incorrecto"));
+                                    }
+                                    return new Retorno2("-", "-", "0", "0");*/
+
+                                case "if":
+                                    Debug.WriteLine("IIIIIIIIIIIIIIIIIIIIF 0");
+                                    Retorno ret = Cond(Nodo.ChildNodes[1]);
+
+                                    if (ret != null)
+                                    {
+                                        Debug.WriteLine("Valor retornado del IF: " + ret.Value);
+                                        if (ret.Value.Equals("True"))
+                                        {
+                                            Debug.WriteLine("El if es True");
+                                            Retorno2 ret2 = Sentencias(Nodo.ChildNodes[4]);
+                                            return ret2;
+                                        }
+                                        else
+                                        {
+                                            Debug.WriteLine("El if es False");
+                                            Retorno2 ret2 = Sentencias(Nodo.ChildNodes[6]);
+                                            return ret2;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        Debug.WriteLine("**Error Semantico** . IF incorrecto en la linea: " + getLine(Nodo.ChildNodes[0]) + " columna:" + getColumn(Nodo.ChildNodes[0]));
+                                        error.Add(new Error(int.Parse(getLine(Nodo.ChildNodes[0])), int.Parse(getColumn(Nodo.ChildNodes[0])), Reservada.ErrorSemantico, "IF incorrecto"));
+                                    }
+                                    return new Retorno2("-", "-", "0", "0");
+
+
+                                case "else":
+                                    Debug.WriteLine("IIIIIIIIIIIIIIIIIIIIF 000000002");
+                                    Retorno ret3 = Cond(Nodo.ChildNodes[2]);
+                                    if (Nodo.ChildNodes[7].Equals(";"))
+                                    {
+                                        if (ret3 != null)
+                                        {
+                                            Debug.WriteLine("Valor retornado del IF: " + ret3.Value);
+                                            if (ret3.Value.Equals("True"))
+                                            {
+                                                Debug.WriteLine("El if es True");
+                                                Retorno2 ret2 = Sentencias(Nodo.ChildNodes[5]);
+                                                return ret2;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            Debug.WriteLine("**Error Semantico** . IF incorrecto en la linea: " + getLine(Nodo.ChildNodes[0]) + " columna:" + getColumn(Nodo.ChildNodes[0]));
+                                            error.Add(new Error(int.Parse(getLine(Nodo.ChildNodes[0])), int.Parse(getColumn(Nodo.ChildNodes[0])), Reservada.ErrorSemantico, "IF incorrecto"));
+                                        }
+                                        return new Retorno2("-", "-", "0", "0");
+                                    }
+                                    else
+                                    {
+
+                                        if (ret3 != null)
+                                        {
+                                            Debug.WriteLine("Valor retornado del IF: " + ret3.Value);
+                                            if (ret3.Value.Equals("True"))
+                                            {
+                                                Debug.WriteLine("El if es True");
+                                                Retorno2 ret2 = Sentencias(Nodo.ChildNodes[5]);
+                                                return ret2;
+                                            }
+                                            else
+                                            {
+                                                Debug.WriteLine("El if es False");
+                                                Retorno2 ret2 = Sentencias(Nodo.ChildNodes[7]);
+                                                return ret2;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            Debug.WriteLine("**Error Semantico** . IF incorrecto en la linea: " + getLine(Nodo.ChildNodes[0]) + " columna:" + getColumn(Nodo.ChildNodes[0]));
+                                            error.Add(new Error(int.Parse(getLine(Nodo.ChildNodes[0])), int.Parse(getColumn(Nodo.ChildNodes[0])), Reservada.ErrorSemantico, "IF incorrecto"));
+                                        }
+                                        return new Retorno2("-", "-", "0", "0");
+                                    }
+                            }
+                            #endregion
+                            break;
+
+                        case 10:
+                            #region
+                            switch (Nodo.ChildNodes[0].Term.Name)
+                            {
+                                case "if":
+                                    Debug.WriteLine("IIIIIIIIIIIIIIIIIIIIF 1");
+                                    return new Retorno2("-", "-", "0", "0");
+                            }
+                            #endregion
+                            break;
+
+                        case 11:
+                            #region
+                            switch (Nodo.ChildNodes[0].Term.Name)
+                            {
+                                case "if":
+                                    Debug.WriteLine("IIIIIIIIIIIIIIIIIIIIF 2:");
+                                    Retorno ret = Cond(Nodo.ChildNodes[1]);
+
+                                    if (ret != null)
+                                    {
+                                        Debug.WriteLine("Valor retornado del IF: " + ret.Value);
+                                        if (ret.Value.Equals("True"))
+                                        {
+                                            Debug.WriteLine("El if es True");
+                                            Retorno2 ret2 = Sentencias(Nodo.ChildNodes[4]);
+                                            return ret2;
+                                        }
+                                        else
+                                        {
+                                            Debug.WriteLine("El if es False");
+                                            Retorno2 ret2 = Sentencias(Nodo.ChildNodes[8]);
+                                            return ret2;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        Debug.WriteLine("**Error Semantico** . IF incorrecto en la linea: " + getLine(Nodo.ChildNodes[0]) + " columna:" + getColumn(Nodo.ChildNodes[0]));
+                                        error.Add(new Error(int.Parse(getLine(Nodo.ChildNodes[0])), int.Parse(getColumn(Nodo.ChildNodes[0])), Reservada.ErrorSemantico, "IF incorrecto"));
+                                    }
+                                    return new Retorno2("-", "-", "0", "0");
+
+                                case "for":
+                                    Debug.WriteLine("FOR 0000001");
+
+                                    //ASignación
+                                    string id4 = Nodo.ChildNodes[1].Token.Value.ToString();
+                                    Simbolo var = RetornarSimbolo(id4);
+                                    Debug.WriteLine("ID del for es: "+ var.Valor);
+
+                                    if (var != null)
+                                    {
+                                        Retorno ret2 = Cond(Nodo.ChildNodes[3]);
+                                        Debug.WriteLine("COND del for es: " + ret2.Value);
+
+                                        if (ret2 != null)
+                                        {
+                                            if (ret2.Type.Equals(var.Tipo))
+                                            {
+                                                Debug.WriteLine("Se asigno variable: " + id4 + ": " + ret2.Value + " (" + ret2.Type + ")");
+                                                var.Valor = ret2.Value;
+                                            }
+                                            else
+                                            {
+                                                Debug.WriteLine("**Error Semantico** Asignación inválida. Tipo de dato incorrecto en la linea: " + getLine(Nodo.ChildNodes[0]) + " columna:" + getColumn(Nodo.ChildNodes[0]));
+                                                error.Add(new Error(int.Parse(getLine(Nodo.ChildNodes[0])), int.Parse(getColumn(Nodo.ChildNodes[0])), Reservada.ErrorSemantico, "Asignación inválida, tipo de dato incorrecto"));
+                                            }
+                                        }
+                                        else
+                                        {
+                                            Debug.WriteLine("**Error Semantico** Asignación inválida. Expresión incorrecta en la linea: " + getLine(Nodo.ChildNodes[0]) + " columna:" + getColumn(Nodo.ChildNodes[0]));
+                                            error.Add(new Error(int.Parse(getLine(Nodo.ChildNodes[0])), int.Parse(getColumn(Nodo.ChildNodes[0])), Reservada.ErrorSemantico, "Asignación inválida. Expresión incorrecta"));
+                                        }
+                                    }
+                                    else
+                                    {
+                                        Debug.WriteLine("**Error Semantico** Variable: " + id4 + " no existe en la linea: " + getLine(Nodo.ChildNodes[0]) + " columna:" + getColumn(Nodo.ChildNodes[0]));
+                                        error.Add(new Error(int.Parse(getLine(Nodo.ChildNodes[0])), int.Parse(getColumn(Nodo.ChildNodes[0])), Reservada.ErrorSemantico, "Variable: " + id4 + " no existe."));
+                                    }
+
+
+                                    //----
+                                    bool flag2 = true;
+                                    Retorno retW = Cond(Nodo.ChildNodes[5]);
+                                    while (flag2)
+                                    {
+                                        Debug.WriteLine("El FOR es: " + retW.Value);
+
+                                        if (retW != null)
+                                        {
+                                            if (int.Parse(var.Valor) <= int.Parse(retW.Value))
+                                            {
+                                                Debug.WriteLine("El FOR es True");
+                                                Retorno2 ret2 = Sentencias(Nodo.ChildNodes[8]);
+                                                var.Valor = (int.Parse(var.Valor) + 1) + "";
+                                            }
+                                            else
+                                            {
+                                                flag2 = false;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            Debug.WriteLine("**Error Semantico** . FOR incorrecto en la linea: " + getLine(Nodo.ChildNodes[0]) + " columna:" + getColumn(Nodo.ChildNodes[0]));
+                                            error.Add(new Error(int.Parse(getLine(Nodo.ChildNodes[0])), int.Parse(getColumn(Nodo.ChildNodes[0])), Reservada.ErrorSemantico, "FOR incorrecto"));
+                                        }
+                                    }
+
+                                    return new Retorno2("-", "-", "0", "0");
+
+                                case "case":/*
+                                    Debug.WriteLine("CASEEEEEEEEE 1:");
+                                    Retorno retC = Cond(Nodo.ChildNodes[1]);
+
+                                    if (retC != null)
+                                    {
+                                        Debug.WriteLine("Valor retornado del CASE: " + retC.Value);
+                                        if (retC.Value.Equals("True"))
+                                        {
+                                            Debug.WriteLine("El if es True");
+                                            Retorno2 ret2 = Sentencias(Nodo.ChildNodes[4]);
+                                            return ret2;
+                                        }
+                                        else
+                                        {
+                                            Debug.WriteLine("El if es False");
+                                            Retorno2 ret2 = Sentencias(Nodo.ChildNodes[8]);
+                                            return ret2;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        Debug.WriteLine("**Error Semantico** . CASE incorrecto en la linea: " + getLine(Nodo.ChildNodes[0]) + " columna:" + getColumn(Nodo.ChildNodes[0]));
+                                        error.Add(new Error(int.Parse(getLine(Nodo.ChildNodes[0])), int.Parse(getColumn(Nodo.ChildNodes[0])), Reservada.ErrorSemantico, "CASE incorrecto"));
+                                    }*/
                                     return new Retorno2("-", "-", "0", "0");
                             }
                             #endregion
@@ -172,11 +559,12 @@ namespace Proyecto1.Recorrido
                         {
                             if (ret1.Type.Equals(Reservada.Booleano) && ret2.Type.Equals(Reservada.Booleano))
                             {
-                                if (ret1.Type.Equals("True"))
+                                if (ret1.Value.Equals("True"))
                                 {
                                     //flag = false;
                                 }
-                                if (ret1.Type.Equals("True") && ret2.Type.Equals("True"))
+                                if ((ret1.Value.Equals("True") && ret2.Value.Equals("True")) ||
+                                    ret1.Value.Equals("true") && ret2.Value.Equals("true"))
                                 {
                                     return new Retorno(Reservada.Booleano, "True", getLine(Nodo.ChildNodes[1]), getColumn(Nodo.ChildNodes[1]));
                                 }
@@ -208,11 +596,12 @@ namespace Proyecto1.Recorrido
                         {
                             if (ret1.Type.Equals(Reservada.Booleano) && ret2.Type.Equals(Reservada.Booleano))
                             {
-                                if (ret2.Type.Equals("False"))
+                                if (ret2.Value.Equals("False") || ret2.Value.Equals("false"))
                                 {
                                     //flag = false;
                                 }
-                                if (ret1.Value.Equals("False") && ret2.Value.Equals("False"))
+                                if (ret1.Value.Equals("False") && ret2.Value.Equals("False") ||
+                                    ret1.Value.Equals("false") && ret2.Value.Equals("false"))
                                 {
                                     return new Retorno(Reservada.Booleano, "False", getLine(Nodo.ChildNodes[1]), getColumn(Nodo.ChildNodes[1]));
                                 }
@@ -590,7 +979,8 @@ namespace Proyecto1.Recorrido
                 {
                     if (condB3.Type.Equals(Reservada.Booleano))
                     {
-                        if (condB3.Type.Equals("True"))
+                        Debug.WriteLine("**********************El valor booleano es: {0}", condB3);
+                        if (condB3.Value.Equals("True") || condB3.Value.Equals("true"))
                         {
                             return new Retorno(Reservada.Booleano, "False", getLine(Nodo.ChildNodes[0]), getColumn(Nodo.ChildNodes[0]));
                         }
@@ -649,29 +1039,29 @@ namespace Proyecto1.Recorrido
 
                                 if (ret1.Type.Equals(Reservada.Booleano))
                                 {
-                                    return new Retorno(Reservada.Booleano, suma + "", getLine(Nodo.ChildNodes[0]), getColumn(Nodo.ChildNodes[0]));
+                                    return new Retorno(Reservada.Booleano, suma + "", getLine(Nodo.ChildNodes[1]), getColumn(Nodo.ChildNodes[1]));
                                 }
                                 else
                                 {
-                                    return new Retorno(ret1.Type, suma + "", getLine(Nodo.ChildNodes[0]), getColumn(Nodo.ChildNodes[0]));
+                                    return new Retorno(ret1.Type, suma + "", getLine(Nodo.ChildNodes[1]), getColumn(Nodo.ChildNodes[1]));
                                 }
                             }
                             else if (ret1.Type.Equals(Reservada.Stringg) || ret2.Type.Equals(Reservada.Stringg))
                             {
                                 string concat = Conv(ret1).Value + Conv(ret2).Value;
-                                return new Retorno(Reservada.Stringg, concat, getLine(Nodo.ChildNodes[0]), getColumn(Nodo.ChildNodes[0]));
+                                return new Retorno(Reservada.Stringg, concat, getLine(Nodo.ChildNodes[1]), getColumn(Nodo.ChildNodes[1]));
                             }
                             else if ((ret1.Type.Equals(Reservada.Booleano) && ret2.Type.Equals(Reservada.Real)) || (ret1.Type.Equals(Reservada.Real) && ret2.Type.Equals(Reservada.Booleano))
                                         || (ret1.Type.Equals(Reservada.Real) && ret2.Type.Equals(Reservada.Entero)) || (ret1.Type.Equals(Reservada.Entero) && ret2.Type.Equals(Reservada.Real))
                                         || (ret1.Type.Equals(Reservada.Real) && ret2.Type.Equals(Reservada.Entero)) || (ret1.Type.Equals(Reservada.Entero) && ret2.Type.Equals(Reservada.Real)))
                             {
                                 double suma = double.Parse(Conv(ret1).Value) + double.Parse(Conv(ret2).Value);
-                                return new Retorno(Reservada.Real, suma + "", getLine(Nodo.ChildNodes[0]), getColumn(Nodo.ChildNodes[0]));
+                                return new Retorno(Reservada.Real, suma + "", getLine(Nodo.ChildNodes[1]), getColumn(Nodo.ChildNodes[1]));
                             }
                             else if ((ret1.Type.Equals(Reservada.Booleano) && ret2.Type.Equals(Reservada.Entero)) || (ret1.Type.Equals(Reservada.Entero) && ret2.Type.Equals(Reservada.Booleano)))
                             {
                                 double suma = double.Parse(Conv(ret1).Value) + double.Parse(Conv(ret2).Value);
-                                return new Retorno(Reservada.Entero, suma + "", getLine(Nodo.ChildNodes[0]), getColumn(Nodo.ChildNodes[0]));
+                                return new Retorno(Reservada.Entero, suma + "", getLine(Nodo.ChildNodes[1]), getColumn(Nodo.ChildNodes[1]));
                             }
                             else
                             {
@@ -699,7 +1089,7 @@ namespace Proyecto1.Recorrido
                                    || (ret1.Type.Equals(Reservada.Entero) && ret2.Type.Equals(Reservada.Booleano)))
                             {
                                 double resta = double.Parse(Conv(ret1).Value) - double.Parse(Conv(ret2).Value);
-                                return new Retorno(Reservada.Entero, resta + "", getLine(Nodo.ChildNodes[0]), getColumn(Nodo.ChildNodes[0]));
+                                return new Retorno(Reservada.Entero, resta + "", getLine(Nodo.ChildNodes[1]), getColumn(Nodo.ChildNodes[1]));
                             }
                             else if ((ret1.Type.Equals(Reservada.Real) && ret2.Type.Equals(Reservada.Real))
                                 || (ret1.Type.Equals(Reservada.Booleano) && ret2.Type.Equals(Reservada.Real))
@@ -708,7 +1098,7 @@ namespace Proyecto1.Recorrido
                                 || (ret1.Type.Equals(Reservada.Entero) && ret2.Type.Equals(Reservada.Real)))
                             {
                                 double resta = double.Parse(Conv(ret1).Value) - double.Parse(Conv(ret2).Value);
-                                return new Retorno(Reservada.Real, resta + "", getLine(Nodo.ChildNodes[0]), getColumn(Nodo.ChildNodes[0]));
+                                return new Retorno(Reservada.Real, resta + "", getLine(Nodo.ChildNodes[1]), getColumn(Nodo.ChildNodes[1]));
                             }
                             else
                             {
@@ -736,7 +1126,7 @@ namespace Proyecto1.Recorrido
                                 || (ret1.Type.Equals(Reservada.Entero) && ret2.Type.Equals(Reservada.Booleano)))
                             {
                                 double mul = double.Parse(Conv(ret1).Value) * double.Parse(Conv(ret2).Value);
-                                return new Retorno(Reservada.Entero, mul + "", getLine(Nodo.ChildNodes[0]), getColumn(Nodo.ChildNodes[0]));
+                                return new Retorno(Reservada.Entero, mul + "", getLine(Nodo.ChildNodes[1]), getColumn(Nodo.ChildNodes[1]));
                             }
                             else if ((ret1.Type.Equals(Reservada.Real) && ret2.Type.Equals(Reservada.Real))
                                 || (ret1.Type.Equals(Reservada.Booleano) && ret2.Type.Equals(Reservada.Real))
@@ -745,7 +1135,7 @@ namespace Proyecto1.Recorrido
                                 || (ret1.Type.Equals(Reservada.Entero) && ret2.Type.Equals(Reservada.Real)))
                             {
                                 double mul = double.Parse(Conv(ret1).Value) * double.Parse(Conv(ret2).Value);
-                                return new Retorno(Reservada.Real, mul + "", getLine(Nodo.ChildNodes[0]), getColumn(Nodo.ChildNodes[0]));
+                                return new Retorno(Reservada.Real, mul + "", getLine(Nodo.ChildNodes[1]), getColumn(Nodo.ChildNodes[1]));
                             }
                             else
                             {
@@ -778,7 +1168,7 @@ namespace Proyecto1.Recorrido
                                 || (ret1.Type.Equals(Reservada.Entero) && ret2.Type.Equals(Reservada.Booleano)))
                             {
                                 double div = double.Parse(Conv(ret1).Value) / double.Parse(Conv(ret2).Value);
-                                return new Retorno(Reservada.Real, div + "", getLine(Nodo.ChildNodes[0]), getColumn(Nodo.ChildNodes[0]));
+                                return new Retorno(Reservada.Real, div + "", getLine(Nodo.ChildNodes[1]), getColumn(Nodo.ChildNodes[1]));
                             }
                             else
                             {
@@ -813,7 +1203,7 @@ namespace Proyecto1.Recorrido
                                 || (ret1.Type.Equals(Reservada.Entero) && ret2.Type.Equals(Reservada.Booleano)))
                             {
                                 double mod = double.Parse(Conv(ret1).Value) % double.Parse(Conv(ret2).Value);
-                                return new Retorno(Reservada.Real, mod + "", getLine(Nodo.ChildNodes[0]), getColumn(Nodo.ChildNodes[0]));
+                                return new Retorno(Reservada.Real, mod + "", getLine(Nodo.ChildNodes[1]), getColumn(Nodo.ChildNodes[1]));
                             }
                             else
                             {
@@ -874,23 +1264,16 @@ namespace Proyecto1.Recorrido
                         case "id": //Esto puede ser una VARIABLE o un ARREGLO
                             string id = Nodo.ChildNodes[0].Token.Value.ToString();
                             Simbolo sim = RetornarSimbolo(id);
+                            //Debug.WriteLine("Simbolo retornado: {0} , {1}", sim.Nombre, sim.Valor);
 
                             if (sim != null)
                             {
-                                /*
-                                if (sim.TipoObjeto.Equals(Reservada.arreglo))
-                                {
-                                    return new Retorno(Reservada.arreglo, id, getLinea(Nodo.ChildNodes[0]), getColumna(Nodo.ChildNodes[0]));
-                                }
-                                else
-                                {*/
                                 return new Retorno(sim.Tipo, sim.Valor, getLine(Nodo.ChildNodes[0]), getColumn(Nodo.ChildNodes[0]));
-                                /*}*/
                             }
                             else
                             {
                                 Debug.WriteLine("Error Semantico-->Variable " + id + " no Existente linea:" + getLine(Nodo.ChildNodes[0]) + " columna:" + getColumn(Nodo.ChildNodes[0]));
-                                error.Add(new Error(int.Parse(getLine(Nodo.ChildNodes[1])), int.Parse(getColumn(Nodo.ChildNodes[1])), Reservada.ErrorSemantico, "Variable " + id + " no existente"));
+                                error.Add(new Error(int.Parse(getLine(Nodo.ChildNodes[0])), int.Parse(getColumn(Nodo.ChildNodes[0])), Reservada.ErrorSemantico, "Variable " + id + " no existente"));
                                 return null;
                             }
 
@@ -925,8 +1308,8 @@ namespace Proyecto1.Recorrido
                             else
                             {
                                 Debug.WriteLine("***Error Semantico*** Error en los Paréntesis en la línea: " +
-                                getLine(Nodo.ChildNodes[1]) + " columna:" + getColumn(Nodo.ChildNodes[1]));
-                                error.Add(new Error(int.Parse(getLine(Nodo.ChildNodes[1])), int.Parse(getColumn(Nodo.ChildNodes[1])), Reservada.ErrorSemantico, "Error en el retorno de los paréntesis"));
+                                getLine(Nodo.ChildNodes[0]) + " columna:" + getColumn(Nodo.ChildNodes[0]));
+                                error.Add(new Error(int.Parse(getLine(Nodo.ChildNodes[0])), int.Parse(getColumn(Nodo.ChildNodes[0])), Reservada.ErrorSemantico, "Error en el retorno de los paréntesis"));
                             }
                             break;
 
@@ -996,15 +1379,68 @@ namespace Proyecto1.Recorrido
             return "";
         }
 
-        private Simbolo RetornarSimbolo(String nombre)
+        private void PdfTS()
         {
-            //ARREGLAR ESTA ONDA PAPU!!!!!!!!!!!!!!
-            //-------------------MAL
+            try
+            {
+                int no = 1;
+                StreamWriter sw;
+                string fileNameerror = @"ts.html";
+                sw = File.CreateText(fileNameerror);
+                sw.WriteLine("<html>");
+                sw.WriteLine("<title>Tabla de símbolos</title>");
+                sw.WriteLine("<center><head><font color=white><h1>TABLA DE SÍMBOLOS</h1></font></head></center>");
+                sw.WriteLine("<body background=noche.jpg bgcolor= black>");
+                sw.WriteLine("<center><table border= 5>");
+                sw.WriteLine("<tr><td><font color=white><center>No.</center></font></td><td><font color=white><center>LÍNEA</center></font></td>" +
+                    "<td><font color= white><center>COLUMNA</center></font></td><td><font color= white><center>NOMBRE</center></font></td>" +
+                    "<td><font color= white><center>TIPO</center></font></td><td><font color= white><center>ÁMBITO</center></font></td></tr>");
+
+
+                foreach (var s in entG)
+                {
+                    foreach (var simbol in s.var)
+                    {
+                        if (simbol.flag)
+                        {
+                            sw.WriteLine("<tr><td><font color=white><center>" + no + "</center></font></td><td><font color=white><center>" +
+                                simbol.Linea + "</center></font></td><td><font color= white><center>" + simbol.Columna + "</center></font></td><td><font color=white><center>"
+                                + simbol.Nombre + "</center></font></td><td><font color= white><center>" + simbol.Tipo
+                                + "</center></font></td><td><font color= white><center>" + simbol.Ambito + "</center></font></td></tr>");
+                            no += 1;
+                        }
+                    }
+                }
+
+
+                sw.WriteLine("</table></center>");
+                sw.WriteLine("</body>");
+                sw.WriteLine("</html>");
+                sw.Flush();
+                sw.Close();
+                //Process.Start(fileNameerror);
+            }
+            catch (Exception)
+            {
+                Debug.WriteLine("No se pudo graficar :(");
+            }
+        }
+
+
+        private Simbolo RetornarSimbolo(string nombre)
+        {
+            Debug.WriteLine("Retornando símbolo: {0}", nombre);
+            Debug.WriteLine("cantidad {0}", cimaEnt.var.Count);
+
+            foreach (var item in cimaEnt.var)
+            {
+                Debug.WriteLine("Variables reconocidas: {0}, de tipo: {1}, de valor: {2}", item.Nombre, item.Tipo, item.Valor);
+            }
             if (cimaEnt.var.Count != 0)
             {
                 foreach (Simbolo simbol in cimaEnt.var)
                 {
-                    if (simbol.Nombre.Equals(nombre))
+                    if (simbol.Nombre.ToLower().Equals(nombre.ToLower()))
                     {
                         return simbol;
                     }
@@ -1014,8 +1450,9 @@ namespace Proyecto1.Recorrido
             return RetornarSimboloAST(nombre, entG);
         }
 
-        private Simbolo RetornarSimboloAST(String nombre, List<Entorno> ent)
+        private Simbolo RetornarSimboloAST(string nombre, List<Entorno> ent)
         {
+            Debug.WriteLine("Buscando simbolo del AST: {0}, el nombre; {1}", ent.Count, nombre);
             foreach (Entorno e in ent)
             {
                 if (e.Flag)
@@ -1037,7 +1474,7 @@ namespace Proyecto1.Recorrido
                     {
                         foreach (Simbolo sim in e.var)
                         {
-                            if (sim.Valor.Equals(nombre))
+                            if (sim.Valor.ToLower().Equals(nombre.ToLower()))
                             {
                                 return sim;
                             }
@@ -1046,15 +1483,31 @@ namespace Proyecto1.Recorrido
                 }
             }
 
+            foreach(var item2 in entG)
+            {
+                foreach (var item in item2.var)
+                {
+                    Debug.WriteLine("Buscando globalmente: {0}, {1}", item.Nombre, item.Valor);
+                    if (nombre.ToLower().Equals(item.Nombre.ToLower()))
+                    {
+                        Debug.WriteLine("Si está globalmente");
+                        return item;
+                    }
+                }
+            }
+
             return null;
+            //return null;
         }
 
         private Entorno getEntornoL(string ambito, string ambitoPadre)
         {
+            Debug.WriteLine("------------ Entorno de funcion: {0}, {1}", ambito, ambitoPadre);
             if (cimaEnt.ent != null)
             {
                 foreach (Entorno en in cimaEnt.ent)
                 {
+                    Debug.WriteLine("------------ Entorno de funcion0000: {0}, {1}", en.Ambito, ambito);
                     if (en.Ambito.Equals(ambito))
                     {
                         en.Flag = true;
@@ -1067,11 +1520,14 @@ namespace Proyecto1.Recorrido
 
         private Entorno getEntorno(string ambito, string ambitoPadre, List<Entorno> entorn)
         {
+            Debug.WriteLine("------------ Entorno de funcion1111: {0}, {1}", ambito, ambitoPadre);
             foreach (Entorno ent in entorn)
             {
                 foreach (Entorno en in ent.Entornos)
                 {
-                    if (en.Ambito.Equals(ambito) && en.AmbitoPadre.Equals(ambitoPadre) && (en.Flag == false))
+                    Debug.WriteLine("------------ Entorno de funcion2: {0}, {1}", en.Ambito, en.AmbitoPadre);
+                    //if (en.Ambito.Equals(ambito) && en.AmbitoPadre.Equals(ambitoPadre) && (en.Flag == false))
+                    if (en.Ambito.Equals(ambito) && en.AmbitoPadre.Equals(ambitoPadre))
                     {
                         en.Flag = true;
                         flag = true;
@@ -1084,12 +1540,15 @@ namespace Proyecto1.Recorrido
                     }
                 }
 
+                Debug.WriteLine("------------ Entorno de funcion3: {0}, {1}", ent.Ambito, ent.AmbitoPadre);
                 if (ent.Ambito.Equals(ambito) && ent.AmbitoPadre.Equals(ambitoPadre))
                 {
                     ent.Flag = true;
                     return ent;
                 }
             }
+
+
             return null;
         }
         private int getCantVar(String cadena)

@@ -9,7 +9,7 @@ namespace Proyecto1.Analizador
 {
     class Gramatica : Grammar
     {
-        public Gramatica() : base (false)
+        public Gramatica() : base (caseSensitive: false)
         {
             #region ER
             IdentifierTerminal Id = new IdentifierTerminal("id");
@@ -219,18 +219,19 @@ namespace Proyecto1.Analizador
                             | GRAF + PAR_IZQ + PAR_DER + PYC
                             | IFS + cond + THENS + list_sentencias
                             | IFS + cond + THENS + list_sentencias + ELSES + list_sentencias
-                            | IFS + cond + THENS + BEGIN_T + list_sentencias + END_T
-                            | IFS + cond + THENS + BEGIN_T + list_sentencias + END_T + ELSES + BEGIN_T + list_sentencias + END_T
-                            | IFS + cond + THENS + BEGIN_T + list_sentencias + END_T + ELSES + list_sentencias
-                            | IFS + cond + THENS + BEGIN_T + list_sentencias + END_T + ELSES + list_sentencias + PYC
+                            | IFS + cond + THENS + BEGIN_T + list_sentencias + END_T + list_sentencias + PYC
                             | IFS + cond + THENS + BEGIN_T + list_sentencias + END_T + PYC
-                            | IFS + cond + THENS + BEGIN_T + list_sentencias + END_T + ELSES + BEGIN_T + list_sentencias + END_T + PYC
+                            //| IFS + cond + THENS + BEGIN_T + list_sentencias + END_T + ELSES + list_sentencias + PYC
+                            | ELSES + IFS + cond + THENS + BEGIN_T + list_sentencias + END_T + list_sentencias
+                            | ELSES + IFS + cond + THENS + BEGIN_T + list_sentencias + END_T
+                            | ELSES + BEGIN_T + list_sentencias + END_T
+                            //| IFS + cond + THENS + BEGIN_T + list_sentencias + END_T + ELSES + BEGIN_T + list_sentencias + END_T + PYC
                             | CASES + cond + OF_T + list_case + ELSES + list_sentencias + END_T + PYC
                             | CASES + cond + OF_T + list_case + ELSES + BEGIN_T + list_sentencias + END_T + PYC + END_T + PYC
                             | CASES + cond + OF_T + list_case + END_T + PYC
                             | WHILES + cond + DOS + BEGIN_T + list_sentencias + END_T + PYC
                             | REPEATS + list_sentencias + UNTILS + cond + PYC
-                            | FORS + Id + ASIGNACION + terminal + TO_T + terminal + DOS + BEGIN_T + list_sentencias + END_T + PYC
+                            | FORS + Id + ASIGNACION + cond + TO_T + cond + DOS + BEGIN_T + list_sentencias + END_T + PYC
                             | EXITS + PAR_IZQ + PAR_DER + PYC
                             | EXITS + PAR_IZQ + cond + PAR_DER + PYC
                             | BREAKS + PYC
@@ -298,9 +299,9 @@ namespace Proyecto1.Analizador
             terminal.Rule = Id
                             | Cadena
                             | Entero
-                            | REAL_T
+                            | Decimal
                             | MENOS + Entero
-                            | MENOS + REAL_T
+                            | MENOS + Decimal
                             | TRUE_T
                             | FALSE_T
                             | Id + PAR_IZQ + PAR_DER // Invocación sin parámetros

@@ -25,6 +25,7 @@ namespace Proyecto1
         public static RichTextBox Salida_Inst;
         public static RichTextBox Consola_Inst;
         private List<Entorno> ent;
+        Ejecucionn ejec;
 
         private bool analizar(string text)
         {
@@ -77,9 +78,38 @@ namespace Proyecto1
             {
                 SalidaErrores.AppendText(error.line + "\t" + error.column + "\t\t" + error.type + "\t" + error.description + "\n");
             }
+
+            SalidaErrores.AppendText("\n======================= SEMÁNTICOS =======================" + "\n");
+            SalidaErrores.AppendText("Linea" + "\t" + "Columna" + "\t\t" + "Tipo" + "\t\t" + "Descripcion" + "\n");
+            foreach (Error error in this.ejec.error)
+            {
+                SalidaErrores.AppendText(error.line + "\t" + error.column + "\t\t" + error.type + "\t" + error.description + "\n");
+            }
         }
 
-        public void GraficarArbol(ParseTreeNode root)
+        private void ViewSymbolTable()
+        {
+            SalidaErrores.AppendText("\n======================= TABLA DE SÍMBOLOS =======================" + "\n");
+            SalidaErrores.AppendText("Ambito" + "\t\t" + "Ambito Padre" + "\n");
+            foreach (var table in this.ent)
+            {
+                foreach (var simbol in table.Entornos)
+                {
+                    SalidaErrores.AppendText(simbol.Ambito + "\t" + simbol.AmbitoPadre + "\n");
+                }
+            }
+            SalidaErrores.AppendText("\nAmbito" + "\t\t" + "Nombre" + "\t" + "Valor" + "\t\t" + "Tipo" + "\t\t" + "Tipo de Objeto" + "\n");
+            foreach (var table in this.ent)
+            {
+                foreach (var simbol in table.var)
+                {
+                    SalidaErrores.AppendText(simbol.Ambito + "\t" + simbol.Nombre + "\t" + simbol.Valor + "\t\t" + simbol.Tipo + "\t\t"
+                        + simbol.TipoObjeto + "\n");
+                }
+            }
+        }
+
+            public void GraficarArbol(ParseTreeNode root)
         {
             try
             {
@@ -136,6 +166,99 @@ namespace Proyecto1
             return r;
         }
 
+        private void PdfErrors()
+        {
+            try
+            {
+                int no = 1;
+                StreamWriter sw;
+                string fileNameerror = @"errores.html";
+                sw = File.CreateText(fileNameerror);
+                sw.WriteLine("<html>");
+                sw.WriteLine("<title>Reporte de Errores</title>");
+                sw.WriteLine("<center><head><font color=white><h1>REPORTE DE ERRORES</h1></font></head></center>");
+                sw.WriteLine("<body background=noche.jpg bgcolor= black>");
+                sw.WriteLine("<center><table border= 5>");
+                sw.WriteLine("<tr><td><font color=white><center>No.</center></font></td><td><font color=white><center>LÍNEA</center></font></td>" + 
+                    "<td><font color= white><center>COLUMNA</center></font></td><td><font color= white><center>TIPO</center></font></td>" + 
+                    "<td><font color= white><center>DESCRIPCIÓN</center></font></td></tr>");
+
+
+                foreach(Error error in error_list)
+                {
+                    sw.WriteLine("<tr><td><font color=white><center>" + no + "</center></font></td><td><font color=white><center>" +
+                        error.line + "</center></font></td><td><font color= white><center>" + error.column + "</center></font></td><td><font color=white><center>" 
+                        + error.type + "</center></font></td><td><font color= white><center>" + error.description + "</center></font></td></tr>");
+                    no += 1;
+                }
+
+                foreach (Error error in this.ejec.error)
+                {
+                    sw.WriteLine("<tr><td><font color=white><center>" + no + "</center></font></td><td><font color=white><center>" +
+                        error.line + "</center></font></td><td><font color= white><center>" + error.column + "</center></font></td><td><font color=white><center>"
+                        + error.type + "</center></font></td><td><font color= white><center>" + error.description + "</center></font></td></tr>");
+                    no += 1;
+                }
+
+                sw.WriteLine("</table></center>");
+                sw.WriteLine("</body>");
+                sw.WriteLine("</html>");
+                sw.Flush();
+                sw.Close();
+                //Process.Start(fileNameerror);
+            }
+            catch (Exception)
+            {
+                MessageBox.Show("Ha ocurrido un error.Verifique....", "ERROR",
+                MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void PdfTS()
+        {
+            try
+            {
+                int no = 1;
+                StreamWriter sw;
+                string fileNameerror = @"ts.html";
+                sw = File.CreateText(fileNameerror);
+                sw.WriteLine("<html>");
+                sw.WriteLine("<title>Tabla de símbolos</title>");
+                sw.WriteLine("<center><head><font color=white><h1>TABLA DE SÍMBOLOS</h1></font></head></center>");
+                sw.WriteLine("<body background=noche.jpg bgcolor= black>");
+                sw.WriteLine("<center><table border= 5>");
+                sw.WriteLine("<tr><td><font color=white><center>No.</center></font></td><td><font color=white><center>LÍNEA</center></font></td>" +
+                    "<td><font color= white><center>COLUMNA</center></font></td><td><font color= white><center>NOMBRE</center></font></td>" +
+                    "<td><font color= white><center>TIPO</center></font></td><td><font color= white><center>ÁMBITO</center></font></td></tr>");
+
+
+                foreach (var s in this.ent)
+                {
+                    foreach (var simbol in s.var)
+                    {
+                        sw.WriteLine("<tr><td><font color=white><center>" + no + "</center></font></td><td><font color=white><center>" +
+                            simbol.Linea + "</center></font></td><td><font color= white><center>" + simbol.Columna + "</center></font></td><td><font color=white><center>"
+                            + simbol.Nombre + "</center></font></td><td><font color= white><center>" + simbol.Tipo
+                            + "</center></font></td><td><font color= white><center>" + simbol.Ambito + "</center></font></td></tr>");
+                        no += 1;
+                    }
+                }
+
+
+                sw.WriteLine("</table></center>");
+                sw.WriteLine("</body>");
+                sw.WriteLine("</html>");
+                sw.Flush();
+                sw.Close();
+                //Process.Start(fileNameerror);
+            }
+            catch (Exception)
+            {
+                MessageBox.Show("Ha ocurrido un error.Verifique....", "ERROR",
+                MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
         private void EJECCUIONTOTAL()
         {
             RecorridoAST pasada = new RecorridoAST();
@@ -144,15 +267,18 @@ namespace Proyecto1
             if (ent != null)
             {
                 Debug.WriteLine("Iniciando Recorrido del AST, Entorno 0\n");
-                Ejecucionn ejec = new Ejecucionn(ent);
+                Debug.WriteLine(ent.Count());
+                foreach(var i in ent)
+                {
+                    foreach (var item in i.var)
+                    {
+                        Debug.WriteLine("Variables reconocidas: {0}, de tipo: {1}, de valor: {2}", item.Nombre, item.Tipo, item.Valor);
+                    }
+                }
+                ejec = new Ejecucionn(ent);
                 ejec.Procedure();
 
-                SalidaErrores.AppendText("\n======================= SEMÁNTICOS =======================" + "\n");
-                SalidaErrores.AppendText("Linea" + "\t" + "Columna" + "\t\t" + "Tipo" + "\t\t" + "Descripcion" + "\n");
-                foreach (Error error in ejec.error)
-                {
-                    SalidaErrores.AppendText(error.line + "\t" + error.column + "\t\t" + error.type + "\t" + error.description + "\n");
-                }
+                ViewErrors();
             }
             else
             {
@@ -194,7 +320,8 @@ namespace Proyecto1
             }
             else if (e.ClickedItem.Name == "toolStripMenuItem3")
             {
-                MessageBox.Show("Tabla de símbolos");
+                ViewSymbolTable();
+                PdfTS();
             }
             else if (e.ClickedItem.Name == "toolStripMenuItem4")
             {
@@ -217,6 +344,7 @@ namespace Proyecto1
             {
                 SalidaErrores.Clear();
                 ViewErrors();
+                PdfErrors();
             }
         }
     }

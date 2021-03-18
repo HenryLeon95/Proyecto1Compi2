@@ -35,11 +35,11 @@ namespace Proyecto1
             this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem7 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem8 = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem4 = new System.Windows.Forms.ToolStripMenuItem();
             this.EDITOR = new System.Windows.Forms.RichTextBox();
             this.Salida = new System.Windows.Forms.RichTextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.SalidaErrores = new System.Windows.Forms.RichTextBox();
-            this.toolStripMenuItem4 = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -92,13 +92,19 @@ namespace Proyecto1
             this.toolStripMenuItem8.Size = new System.Drawing.Size(120, 32);
             this.toolStripMenuItem8.Text = "Ver Errores";
             // 
+            // toolStripMenuItem4
+            // 
+            this.toolStripMenuItem4.Name = "toolStripMenuItem4";
+            this.toolStripMenuItem4.Size = new System.Drawing.Size(91, 32);
+            this.toolStripMenuItem4.Text = "Limpiar";
+            // 
             // EDITOR
             // 
             this.EDITOR.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.EDITOR.ForeColor = System.Drawing.SystemColors.InactiveBorder;
             this.EDITOR.Location = new System.Drawing.Point(0, 38);
             this.EDITOR.Name = "EDITOR";
-            this.EDITOR.Size = new System.Drawing.Size(1119, 650);
+            this.EDITOR.Size = new System.Drawing.Size(1000, 650);
             this.EDITOR.TabIndex = 1;
             this.EDITOR.Text = "";
             // 
@@ -106,9 +112,9 @@ namespace Proyecto1
             // 
             this.Salida.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.Salida.ForeColor = System.Drawing.SystemColors.Window;
-            this.Salida.Location = new System.Drawing.Point(1122, 93);
+            this.Salida.Location = new System.Drawing.Point(1006, 93);
             this.Salida.Name = "Salida";
-            this.Salida.Size = new System.Drawing.Size(591, 595);
+            this.Salida.Size = new System.Drawing.Size(707, 595);
             this.Salida.TabIndex = 2;
             this.Salida.Text = "";
             // 
@@ -132,12 +138,6 @@ namespace Proyecto1
             this.SalidaErrores.Size = new System.Drawing.Size(1711, 275);
             this.SalidaErrores.TabIndex = 4;
             this.SalidaErrores.Text = "";
-            // 
-            // toolStripMenuItem4
-            // 
-            this.toolStripMenuItem4.Name = "toolStripMenuItem4";
-            this.toolStripMenuItem4.Size = new System.Drawing.Size(91, 32);
-            this.toolStripMenuItem4.Text = "Limpiar";
             // 
             // Form1
             // 

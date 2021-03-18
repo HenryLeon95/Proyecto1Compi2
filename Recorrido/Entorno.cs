@@ -96,7 +96,6 @@ namespace Proyecto1.Recorrido
                             Debug.WriteLine("================================================================================");
                             Debug.WriteLine("Nuevo entorno de funcion(" + Nodo.Term.Name + "): " + Nodo.ChildNodes[1].Token.Text);
                             Debug.WriteLine("================================================================================");
-                            Form1.Salida_Inst.AppendText("Prueba");
                             this.ambitoNormal = Nodo.ChildNodes[1].Token.Text;
                             this.NodoAux = Nodo.ChildNodes[7];
                             Cuerpo(Nodo.ChildNodes[5]);
@@ -191,6 +190,7 @@ namespace Proyecto1.Recorrido
                     break;
                 case "const":
                     //Probar si funciona igual que var, el de antes
+                    list_vars(Reservada.var, Nodo.ChildNodes[1]);
                     break;
                 case "id":
                     break;
@@ -275,7 +275,7 @@ namespace Proyecto1.Recorrido
                     case "id":
                         string id = Nodo.Token.Value.ToString();
 
-                        Debug.WriteLine("---------BIEEEEEEEEEEEEN: Variable reconocida. Nombre variable: " + id + 
+                        Debug.WriteLine("---------Variable reconocida. Nombre variable: " + id + 
                             " tipo objeto: " + tipoObj + " tipo dato: " + tipodato + " valor asignado: " + ret.Value.ToString());
 
                         if (!SimbolExist(id))
@@ -284,8 +284,9 @@ namespace Proyecto1.Recorrido
                             {
                                 if (ret.Type.Equals(tipodato)) 
                                 {
-                                    Debug.WriteLine("----------- SIIIIIIIIUUUUUU. Se creo la variable: " + id + ". Con valor: " + ret.Value +
+                                    Debug.WriteLine("----------- Se creo la variable: " + id + ". Con valor: " + ret.Value +
                                         " y de tipo: " + ret.Type);
+                                    Debug.WriteLine(var.Count);
                                     var.Add(new Simbolo(getLine(Nodo), getColumn(Nodo), Reservada.varL, id, ret.Value, tipodato, Reservada.var, true, null));
                                 }
                                 else
@@ -334,11 +335,12 @@ namespace Proyecto1.Recorrido
                         {
                             if (cond.Type.Equals(Reservada.Booleano) && cond1.Type.Equals(Reservada.Booleano))
                             {
-                                if (cond.Type.Equals("True"))
+                                if (cond.Value.Equals("True") || cond.Value.Equals("true"))
                                 {
                                     //flag = false;
                                 }
-                                if (cond.Type.Equals("True") && cond1.Type.Equals("True"))
+                                if ((cond.Value.Equals("True") && cond1.Value.Equals("True")) ||
+                                    (cond.Value.Equals("true") && cond1.Value.Equals("true")))
                                 {
                                     return new Retorno(Reservada.Booleano, "True", getLine(Nodo.ChildNodes[1]), getColumn(Nodo.ChildNodes[1]));
                                 }
@@ -373,11 +375,12 @@ namespace Proyecto1.Recorrido
                         {
                             if (condA1.Type.Equals(Reservada.Booleano) && condA2.Type.Equals(Reservada.Booleano))
                             {
-                                if (condA2.Type.Equals("False"))
+                                if (condA2.Value.Equals("False") || condA2.Value.Equals("false"))
                                 {
                                     //flag = false;
                                 }
-                                if (condA1.Value.Equals("False") && condA2.Value.Equals("False"))
+                                if (condA1.Value.Equals("False") && condA2.Value.Equals("False") ||
+                                    condA1.Value.Equals("false") && condA2.Value.Equals("false"))
                                 {
                                     return new Retorno(Reservada.Booleano, "False", getLine(Nodo.ChildNodes[1]), getColumn(Nodo.ChildNodes[1]));
                                 }
@@ -770,7 +773,8 @@ namespace Proyecto1.Recorrido
                 {
                     if (condB3.Type.Equals(Reservada.Booleano))
                     {
-                        if (condB3.Type.Equals("True"))
+                        Debug.WriteLine("*************** El valor booleano es: {0}", condB3.Value);
+                        if (condB3.Value.Equals("True") || condB3.Value.Equals("true"))
                         {
                             return new Retorno(Reservada.Booleano, "False", getLine(Nodo.ChildNodes[0]), getColumn(Nodo.ChildNodes[0]));
                         }
