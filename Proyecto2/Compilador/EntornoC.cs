@@ -6,12 +6,12 @@ using Irony.Parsing;
 using System.Diagnostics;
 using System.Text;
 
-namespace Proyecto1.Recorrido
+namespace Proyecto1.Proyecto2.Compilador
 {
-    class Entorno
+    class EntornoC
     {
         public List<Simbolo> var = null;
-        public List<Entorno> ent = null;
+        public List<EntornoC> ent = null;
         public List<Error> error = new List<Error>();
         private ParseTreeNode Nodo = null;
         private ParseTreeNode NodoAux;
@@ -20,10 +20,10 @@ namespace Proyecto1.Recorrido
         private bool flag;
 
 
-        public Entorno(ParseTreeNode nodo, string ambito)
+        public EntornoC(ParseTreeNode nodo, string ambito)
         {
             this.var = new List<Simbolo>();
-            this.ent = new List<Entorno>();
+            this.ent = new List<EntornoC>();
             this.Nodo = nodo;   //Agregar, nodo2 si no deja obtener el entorno de las funciones
             this.ambitoPadre = ambito;
             this.NodoAux = null;
@@ -60,7 +60,7 @@ namespace Proyecto1.Recorrido
             set => var = value;
         }
 
-        public List<Entorno> Entornos
+        public List<EntornoC> Entornos
         {
             get => ent;
             set => ent = value;
@@ -152,13 +152,13 @@ namespace Proyecto1.Recorrido
                                 break;
                             case "funcion":
                                 Debug.WriteLine("** Creando un nuevo entorno de funcion");
-                                Entorno entVar = new Entorno(Nodo.ChildNodes[0], ambitoNormal);
+                                EntornoC entVar = new EntornoC(Nodo.ChildNodes[0], ambitoNormal);
                                 entVar.Inicio();
                                 this.ent.Add(entVar);
                                 break;
                             case "procedimiento":
                                 Debug.WriteLine("** Creando un nuevo entorno de procedimiento");
-                                Entorno entProc = new Entorno(Nodo.ChildNodes[0], ambitoNormal);
+                                EntornoC entProc = new EntornoC(Nodo.ChildNodes[0], ambitoNormal);
                                 entProc.Inicio();
                                 this.ent.Add(entProc);
                                 break;

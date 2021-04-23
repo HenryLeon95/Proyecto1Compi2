@@ -40,6 +40,7 @@ namespace Proyecto1
             this.Salida = new System.Windows.Forms.RichTextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.SalidaErrores = new System.Windows.Forms.RichTextBox();
+            this.toolStripMenuItem5 = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -49,11 +50,12 @@ namespace Proyecto1
             this.menuStrip1.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.menuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripMenuItem1,
             this.toolStripMenuItem2,
+            this.toolStripMenuItem1,
             this.toolStripMenuItem3,
-            this.toolStripMenuItem7,
+            this.toolStripMenuItem5,
             this.toolStripMenuItem8,
+            this.toolStripMenuItem7,
             this.toolStripMenuItem4});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
@@ -65,8 +67,8 @@ namespace Proyecto1
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(109, 32);
-            this.toolStripMenuItem1.Text = "Traductor";
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(143, 32);
+            this.toolStripMenuItem1.Text = "Optimización";
             // 
             // toolStripMenuItem2
             // 
@@ -139,6 +141,12 @@ namespace Proyecto1
             this.SalidaErrores.TabIndex = 4;
             this.SalidaErrores.Text = "";
             // 
+            // toolStripMenuItem5
+            // 
+            this.toolStripMenuItem5.Name = "toolStripMenuItem5";
+            this.toolStripMenuItem5.Size = new System.Drawing.Size(176, 32);
+            this.toolStripMenuItem5.Text = "Ver Optimización";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -175,6 +183,7 @@ namespace Proyecto1
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.RichTextBox SalidaErrores;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem4;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem5;
     }
 }
 

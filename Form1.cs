@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Proyecto1.Analizador;
 using Proyecto1.Recorrido;
+using Proyecto1.Proyecto2.Compilador;
 using Irony.Ast;
 using Irony.Parsing;
 using System.IO;
@@ -297,7 +298,7 @@ namespace Proyecto1
         {
             if (e.ClickedItem.Name == "toolStripMenuItem1")
             {
-                MessageBox.Show("Traduciendo...");
+                MessageBox.Show("Optimizando...");
             }
             else if (e.ClickedItem.Name == "toolStripMenuItem2")
             {
@@ -306,7 +307,8 @@ namespace Proyecto1
                     if (analizar(EDITOR.Text))
                     {
                         Salida.AppendText("Análisis Exitoso\n");
-                        EJECCUIONTOTAL();
+                        //EJECCUIONTOTAL(); //P1
+                        Salida.AppendText(COMPI2());
                     }
                     else
                     {
@@ -329,6 +331,12 @@ namespace Proyecto1
                 Salida.Clear();
                 SalidaErrores.Clear();
             }
+            else if (e.ClickedItem.Name == "toolStripMenuItem5")
+            {
+                EDITOR.Clear();
+                Salida.Clear();
+                SalidaErrores.Clear();
+            }
             else if (e.ClickedItem.Name == "toolStripMenuItem7")
             {
                 if(raiz == null)
@@ -346,6 +354,37 @@ namespace Proyecto1
                 ViewErrors();
                 PdfErrors();
             }
+        }
+
+        // ---------------------------------------- PROYECTO 2 ---------------------------------------------------
+        private string COMPI2()
+        {
+            //RecorridoAST pasada = new RecorridoAST();
+            //ent = pasada.Recorriendo(raiz);
+
+            //if (ent != null)
+            //{
+            //    Debug.WriteLine("Iniciando Recorrido del AST, Entorno 0\n");
+            //    Debug.WriteLine(ent.Count());
+            //    foreach (var i in ent)
+            //    {
+            //        foreach (var item in i.var)
+            //        {
+            //            Debug.WriteLine("Variables reconocidas: {0}, de tipo: {1}, de valor: {2}", item.Nombre, item.Tipo, item.Valor);
+            //        }
+            //    }
+            //    ejec = new Ejecucionn(ent);
+            //    ejec.Procedure();
+
+            //    ViewErrors();
+            //}
+            //else
+            //{
+            //    SalidaErrores.AppendText("**ERROR FATAL** Arbol retornó nulo\n");
+            //}
+            C3D generator = C3D.getGenerator();
+            string output = generator.getCode();
+            return output;
         }
     }
 }
