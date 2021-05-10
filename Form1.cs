@@ -28,6 +28,9 @@ namespace Proyecto1
         private List<Entorno> ent;
         Ejecucionn ejec;
 
+        //PROYECTO2
+        private List<EntornoC> enviroment;
+
         private bool analizar(string text)
         {
             bool flag = false;
@@ -82,6 +85,10 @@ namespace Proyecto1
 
             SalidaErrores.AppendText("\n======================= SEMÁNTICOS =======================" + "\n");
             SalidaErrores.AppendText("Linea" + "\t" + "Columna" + "\t\t" + "Tipo" + "\t\t" + "Descripcion" + "\n");
+            //foreach (Error error in this.ejec.error)
+            //{
+            //    SalidaErrores.AppendText(error.line + "\t" + error.column + "\t\t" + error.type + "\t" + error.description + "\n");
+            //}
             foreach (Error error in this.ejec.error)
             {
                 SalidaErrores.AppendText(error.line + "\t" + error.column + "\t\t" + error.type + "\t" + error.description + "\n");
@@ -359,11 +366,18 @@ namespace Proyecto1
         // ---------------------------------------- PROYECTO 2 ---------------------------------------------------
         private string COMPI2()
         {
-            //RecorridoAST pasada = new RecorridoAST();
-            //ent = pasada.Recorriendo(raiz);
+            RecorriendoC3D AST = new RecorriendoC3D();
+            enviroment = AST.Rec(raiz);
 
-            //if (ent != null)
-            //{
+            if (enviroment != null)
+            {
+                Debug.WriteLine("Iniciando recorrrido del AST, Entorno 0\n");
+            }
+            else
+            {
+                SalidaErrores.AppendText("**ERROR FATAL** Arbol retornó nulo\n");
+            }
+
             //    Debug.WriteLine("Iniciando Recorrido del AST, Entorno 0\n");
             //    Debug.WriteLine(ent.Count());
             //    foreach (var i in ent)
@@ -377,11 +391,6 @@ namespace Proyecto1
             //    ejec.Procedure();
 
             //    ViewErrors();
-            //}
-            //else
-            //{
-            //    SalidaErrores.AppendText("**ERROR FATAL** Arbol retornó nulo\n");
-            //}
             C3D generator = C3D.getGenerator();
             string output = generator.getCode();
             return output;
